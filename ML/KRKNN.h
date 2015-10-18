@@ -8,6 +8,12 @@
 
 #import <Foundation/Foundation.h>
 
+typedef enum KRKNNKernels
+{
+    KRKNNKernelByCosineSimilarity = 0,
+    KRKNNKernelByEuclidean        = 1
+}KRKNNKernels;
+
 typedef void(^KRKNNCompletion)(BOOL success, NSString *ownGroup, NSInteger groupCounts, NSDictionary *allData);
 
 @interface KRKNN : NSObject
@@ -15,6 +21,7 @@ typedef void(^KRKNNCompletion)(BOOL success, NSString *ownGroup, NSInteger group
 @property (nonatomic, strong) NSMutableDictionary *allData;
 @property (nonatomic, strong) NSMutableDictionary *trainingSets;
 @property (nonatomic, strong) NSMutableDictionary *trainingGroups;
+@property (nonatomic, assign) KRKNNKernels kernel;
 @property (nonatomic, copy) KRKNNCompletion completion;
 
 +(instancetype)sharedInstance;

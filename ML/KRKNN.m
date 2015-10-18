@@ -15,8 +15,8 @@
 
 @implementation KRKNN (fixCalculations)
 
-// Calculated by Cosine Similarity method.
--(float)_sumClassifiedFeatures:(NSArray *)_classifiedFeatures trainFeatures:(NSArray *)_trainFeatures
+// Calculated by Cosine Similarity method, 歸屬度概念是越大越近
+-(float)_distanceCosineWithClassifiedFeatures:(NSArray *)_classifiedFeatures patternFeatures:(NSArray *)_patternFeatures
 {
     float _sumA  = 0.0f;
     float _sumB  = 0.0f;
@@ -24,15 +24,48 @@
     int _index   = 0;
     for( NSNumber *_featureValue in _classifiedFeatures )
     {
-        NSNumber *_trainValue = [_trainFeatures objectAtIndex:_index];
+        NSNumber *_patternValue = [_patternFeatures objectAtIndex:_index];
         float _aValue  = [_featureValue floatValue];
-        float _bValue  = [_trainValue floatValue];
+        float _bValue  = [_patternValue floatValue];
         _sumA         += ( _aValue * _aValue );
         _sumB         += ( _bValue * _bValue );
         _sumAB        += ( _aValue * _bValue );
         ++_index;
     }
-    return ( _sumAB / sqrtf( _sumA * _sumB ) );
+    float _ab = _sumA * _sumB;
+    return ( _ab > 0.0f ) ? ( _sumAB / sqrtf( _ab ) ) : 0.0f;
+}
+
+// Euclidean distance which multi-dimensional formula, 距離概念是越小越近
+-(float)_distanceEuclideanWithClassifiedFeatures:(NSArray *)_classifiedFeatures patternFeatures:(NSArray *)_patternFeatures
+{
+    NSInteger _index = 0;
+    float _sum       = 0.0f;
+    for( NSNumber *_x in _classifiedFeatures )
+    {
+        _sum        += powf([_x floatValue] - [[_patternFeatures objectAtIndex:_index] floatValue], 2);
+        ++_index;
+    }
+    return (_index > 0) ? sqrtf(_sum) : _sum;
+}
+
+// 距離概念是越小越近, 歸屬度概念是越大越近 (也能取其差值，即能越小越近)
+-(float)_distanceWithClassifiedFeatures:(NSArray *)_classifiedFeatures patternFeatures:(NSArray *)_patternFeatures
+{
+    float _distance = 0.0f;
+    switch (self.kernel)
+    {
+        case KRKNNKernelByCosineSimilarity:
+            _distance = [self _distanceCosineWithClassifiedFeatures:_classifiedFeatures patternFeatures:_patternFeatures];
+            break;
+        case KRKNNKernelByEuclidean:
+            _distance = [self _distanceEuclideanWithClassifiedFeatures:_classifiedFeatures patternFeatures:_patternFeatures];
+            break;
+        default:
+            break;
+    }
+    NSLog(@"_distance : %f", _distance);
+    return _distance;
 }
 
 -(void)_addClassifiedSetsAtFeatures:(NSArray *)_features group:(NSString *)_group identifier:(NSString *)_identifier
@@ -65,6 +98,7 @@
         _trainingSets   = [NSMutableDictionary new];
         _trainingGroups = [NSMutableDictionary new];
         _allData        = [NSMutableDictionary new];
+        _kernel         = KRKNNKernelByCosineSimilarity;
     }
     return self;
 }
@@ -118,12 +152,13 @@
     // Catchs every feature
     for( NSArray *_classifiedId in _trainingSets )
     {
-        float _distance = [self _sumClassifiedFeatures:[_trainingSets objectForKey:_classifiedId] trainFeatures:_features];
+        float _distance = [self _distanceWithClassifiedFeatures:[_trainingSets objectForKey:_classifiedId] patternFeatures:_features];
         [_sorts addObject:@{_idKey : _classifiedId, _distanceKey : [NSNumber numberWithFloat:_distance]}];
     }
     
-    // Sorting by DESC
-    NSSortDescriptor *_sortDescriptor    = [NSSortDescriptor sortDescriptorWithKey:_distanceKey ascending:NO];
+    // If used Cosine Similarity that need to sort by DESC, if used Euclidean that need to sort by ASC
+    BOOL _sortingByAsc                   = (_kernel == KRKNNKernelByCosineSimilarity) ? NO : YES;
+    NSSortDescriptor *_sortDescriptor    = [NSSortDescriptor sortDescriptorWithKey:_distanceKey ascending:_sortingByAsc];
     NSArray *_sortedGroups               = [_sorts sortedArrayUsingDescriptors:[NSArray arrayWithObject:_sortDescriptor]];
     
     // Catchs K neighbors

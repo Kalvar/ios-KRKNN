@@ -7,7 +7,7 @@ Machine Learning (マシンラーニング) in this project, it implemented KNN(
 
 ```ruby
 platform :ios, '7.0'
-pod "KRKNN", "~> 1.0.0"
+pod "KRKNN", "~> 1.1.0"
 ```
 
 ## How to use
@@ -22,6 +22,9 @@ pod "KRKNN", "~> 1.0.0"
     [super viewDidLoad];
     
     KRKNN *_knn = [KRKNN sharedInstance];
+    // To use Cosine Simlarity or Euclidean that will have different results, suggests to use Cosine Similarity
+    _knn.kernel = KRKNNKernelByCosineSimilarity;
+    //_knn.kernel = KRKNNKernelByEuclidean;
     
     // Features are wording appeared times on a paper as below like :
     // Apple, OS, Mobile, Taiwan, Japan, Developer
@@ -68,7 +71,7 @@ pod "KRKNN", "~> 1.0.0"
 
 ## Version
 
-V1.0.0
+V1.1.0
 
 ## License
 
