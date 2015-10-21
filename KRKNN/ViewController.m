@@ -54,11 +54,11 @@
     [_knn classifyFeatures:@[@20, @1, @10, @2, @12, @3]
                 identifier:@"Bob"
                  kNeighbor:3
-                completion:^(BOOL success, NSString *ownGroup, NSInteger groupCounts, NSDictionary *allData) {
+                completion:^(BOOL success, NSString *ownGroup, NSInteger neighborCount, NSDictionary *allData) {
                     if( success )
                     {
                         NSLog(@"ownGroup : %@", ownGroup);
-                        NSLog(@"groupCounts : %li", groupCounts);
+                        NSLog(@"neighborCount : %li", neighborCount);
                         NSLog(@"allData : %@", allData);
                     }
                 }];

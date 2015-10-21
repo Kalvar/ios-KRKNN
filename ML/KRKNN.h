@@ -14,7 +14,7 @@ typedef enum KRKNNKernels
     KRKNNKernelByEuclidean        = 1
 }KRKNNKernels;
 
-typedef void(^KRKNNCompletion)(BOOL success, NSString *ownGroup, NSInteger groupCounts, NSDictionary *allData);
+typedef void(^KRKNNCompletion)(BOOL success, NSString *ownGroup, NSInteger neighborCount, NSDictionary *allData);
 
 @interface KRKNN : NSObject
 
