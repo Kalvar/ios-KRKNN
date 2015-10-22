@@ -243,4 +243,15 @@
     
 }
 
+-(void)classifyFeatures:(NSArray *)_features identifier:(NSString *)_identifier completion:(KRKNNCompletion)_doCompletion
+{
+    [self classifyFeatures:_features identifier:_identifier kNeighbor:[self chooseK] completion:_doCompletion];
+}
+
+// Use sqrt(N) to quickly and simply choose the K number.
+-(NSInteger)chooseK
+{
+    return (NSInteger)ceilf( sqrtf( [_trainingSets count] ) );
+}
+
 @end

@@ -29,6 +29,9 @@ typedef void(^KRKNNCompletion)(BOOL success, NSString *ownGroup, NSInteger neigh
 
 -(void)addFeatures:(NSArray *)_features group:(NSString *)_group identifier:(NSString *)_identifier;
 -(void)classifyFeatures:(NSArray *)_features identifier:(NSString *)_identifier kNeighbor:(NSInteger)_kNeighbor completion:(KRKNNCompletion)_doCompletion;
+-(void)classifyFeatures:(NSArray *)_features identifier:(NSString *)_identifier completion:(KRKNNCompletion)_doCompletion;
+
+-(NSInteger)chooseK;
 
 
 @end

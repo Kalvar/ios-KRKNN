@@ -7,7 +7,7 @@ Machine Learning (マシンラーニング) in this project, it implemented KNN(
 
 ```ruby
 platform :ios, '7.0'
-pod "KRKNN", "~> 1.1.1"
+pod "KRKNN", "~> 1.1.2"
 ```
 
 ## How to use
@@ -54,7 +54,7 @@ pod "KRKNN", "~> 1.1.1"
     
     [_knn classifyFeatures:@[@20, @1, @10, @2, @12, @3]
                 identifier:@"Bob"
-                 kNeighbor:3
+                 kNeighbor:[_knn chooseK]
                 completion:^(BOOL success, NSString *ownGroup, NSInteger neighborCount, NSDictionary *allData) {
                     if( success )
                     {
@@ -71,7 +71,7 @@ pod "KRKNN", "~> 1.1.1"
 
 ## Version
 
-V1.1.1
+V1.1.2
 
 ## License
 

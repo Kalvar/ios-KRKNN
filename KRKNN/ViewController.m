@@ -53,7 +53,7 @@
     
     [_knn classifyFeatures:@[@20, @1, @10, @2, @12, @3]
                 identifier:@"Bob"
-                 kNeighbor:3
+                 kNeighbor:[_knn chooseK]
                 completion:^(BOOL success, NSString *ownGroup, NSInteger neighborCount, NSDictionary *allData) {
                     if( success )
                     {
