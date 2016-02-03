@@ -64,9 +64,7 @@ _knn.kernel = KRKNNKernelEuclidean;
             }];
 ```
 
-#### More Distance of Kernel Methods
-
-Current implemented kernel methods are :
+Current implemented distance of kernel methods are :
 
 ``` objective-c
 KRKNNKernelEuclidean
