@@ -22,8 +22,9 @@
     KRKNN *_knn = [KRKNN sharedInstance];
     
     // To use Cosine Simlarity or Euclidean that will have different results, suggests to use Cosine Similarity
-    _knn.kernel = KRKNNKernelByCosineSimilarity;
-    //_knn.kernel = KRKNNKernelByEuclidean;
+    _knn.kernel = KRKNNKernelCosineSimilarity;
+    //_knn.kernel = KRKNNKernelEuclidean;
+    //_knn.kernel = KRKNNKernelRBF;
     
     // Features are wording appeared times on a paper as below like :
     // Apple, OS, Mobile, Taiwan, Japan, Developer

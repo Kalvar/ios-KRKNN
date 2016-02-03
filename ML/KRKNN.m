@@ -16,7 +16,7 @@
 @implementation KRKNN (fixCalculations)
 
 // Calculated by Cosine Similarity method, 歸屬度概念是越大越近
--(float)_distanceCosineWithClassifiedFeatures:(NSArray *)_classifiedFeatures patternFeatures:(NSArray *)_patternFeatures
+-(float)_cosineWithClassifiedFeatures:(NSArray *)_classifiedFeatures patternFeatures:(NSArray *)_patternFeatures
 {
     float _sumA  = 0.0f;
     float _sumB  = 0.0f;
@@ -37,7 +37,7 @@
 }
 
 // Euclidean distance which multi-dimensional formula, 距離概念是越小越近
--(float)_distanceEuclideanWithClassifiedFeatures:(NSArray *)_classifiedFeatures patternFeatures:(NSArray *)_patternFeatures
+-(float)_euclideanWithClassifiedFeatures:(NSArray *)_classifiedFeatures patternFeatures:(NSArray *)_patternFeatures
 {
     NSInteger _index = 0;
     float _sum       = 0.0f;
@@ -49,17 +49,35 @@
     return (_index > 0) ? sqrtf(_sum) : _sum;
 }
 
+-(double)_rbf:(NSArray *)_x1 x2:(NSArray *)_x2 sigma:(float)_sigma
+{
+    double _sum      = 0.0f;
+    NSInteger _index = 0;
+    for( NSNumber *_value in _x1 )
+    {
+        // Formula : s = s + ( v1[i] - v2[i] )^2
+        double _v  = [_value doubleValue] - [[_x2 objectAtIndex:_index] doubleValue];
+        _sum      += ( _v * _v );
+        ++_index;
+    }
+    // Formula : exp^( -s / ( 2.0f * sigma * sigma ) )
+    return pow(M_E, ((-_sum) / ( 2.0f * _sigma * _sigma )));
+}
+
 // 距離概念是越小越近, 歸屬度概念是越大越近 (也能用 1.0f 取其差值，即能越小越近)
 -(float)_distanceWithClassifiedFeatures:(NSArray *)_classifiedFeatures patternFeatures:(NSArray *)_patternFeatures
 {
     float _distance = 0.0f;
     switch (self.kernel)
     {
-        case KRKNNKernelByCosineSimilarity:
-            _distance = 1.0f - [self _distanceCosineWithClassifiedFeatures:_classifiedFeatures patternFeatures:_patternFeatures];
+        case KRKNNKernelCosineSimilarity:
+            _distance = 1.0f - [self _cosineWithClassifiedFeatures:_classifiedFeatures patternFeatures:_patternFeatures];
             break;
-        case KRKNNKernelByEuclidean:
-            _distance = [self _distanceEuclideanWithClassifiedFeatures:_classifiedFeatures patternFeatures:_patternFeatures];
+        case KRKNNKernelEuclidean:
+            _distance = [self _euclideanWithClassifiedFeatures:_classifiedFeatures patternFeatures:_patternFeatures];
+            break;
+        case KRKNNKernelRBF:
+            _distance = [self _rbf:_classifiedFeatures x2:_patternFeatures sigma:2.0f];
             break;
         default:
             break;
@@ -98,7 +116,7 @@
         _trainingSets   = [NSMutableDictionary new];
         _trainingGroups = [NSMutableDictionary new];
         _allData        = [NSMutableDictionary new];
-        _kernel         = KRKNNKernelByCosineSimilarity;
+        _kernel         = KRKNNKernelCosineSimilarity;
     }
     return self;
 }

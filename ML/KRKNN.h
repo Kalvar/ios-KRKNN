@@ -10,8 +10,9 @@
 
 typedef enum KRKNNKernels
 {
-    KRKNNKernelByCosineSimilarity = 0,
-    KRKNNKernelByEuclidean        = 1
+    KRKNNKernelCosineSimilarity = 0,
+    KRKNNKernelEuclidean        = 1,
+    KRKNNKernelRBF
 }KRKNNKernels;
 
 typedef void(^KRKNNCompletion)(BOOL success, NSString *ownGroup, NSInteger neighborCount, NSDictionary *allData);

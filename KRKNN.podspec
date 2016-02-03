@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = "KRKNN"
-  s.version      = "1.1.2"
+  s.version      = "1.1.3"
   s.summary      = "k-Nearest Neighbor that classficiation method on Machine Learning."
   s.description  = <<-DESC
                    Machine Learning (マシンラーニング) in this project, it implemented KNN(k-Nearest Neighbor) that classification method. It can be used on products recommendation (おすすめの商品), user behavior analysis (ユーザーの行動分析), data mining (データマイニング) and data analysis (データ分析).
