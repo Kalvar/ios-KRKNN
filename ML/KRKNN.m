@@ -120,7 +120,7 @@
 
 #pragma --mark Creates Training Sets
 // Adding the training sets be the basic patterns to do classfication.
-// @param _group means the training-sets own to which group.
+// @param groupName means the training-sets own to which group.
 -(void)addFeatures:(NSArray *)_features groupName:(NSString *)_groupName identifier:(NSString *)_identifier
 {
     if( nil == _features || [_features count] < 1 )
