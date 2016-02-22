@@ -16,6 +16,7 @@
 
 +(instancetype)sharedPattern;
 -(instancetype)init;
+-(instancetype)initWithFeatures:(NSArray *)_kFeatures groupName:(NSString *)_kGroupName identifier:(NSString *)_kIdentifier;
 
 -(void)addFeatures:(NSArray *)_kFeatures groupName:(NSString *)_kGroupName identifier:(NSString *)_kIdentifier;
 

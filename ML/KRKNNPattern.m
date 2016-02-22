@@ -32,6 +32,16 @@
     return self;
 }
 
+-(instancetype)initWithFeatures:(NSArray *)_kFeatures groupName:(NSString *)_kGroupName identifier:(NSString *)_kIdentifier
+{
+    self = [self init];
+    if( self )
+    {
+        [self addFeatures:_kFeatures groupName:_kGroupName identifier:_kIdentifier];
+    }
+    return self;
+}
+
 -(void)addFeatures:(NSArray *)_kFeatures groupName:(NSString *)_kGroupName identifier:(NSString *)_kIdentifier
 {
     [_features addObjectsFromArray:[_kFeatures copy]];

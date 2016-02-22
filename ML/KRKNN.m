@@ -88,9 +88,8 @@
 
 -(void)_addClassifiedSetsAtFeatures:(NSArray *)_features groupName:(NSString *)_group identifier:(NSString *)_identifier
 {
-    KRKNNPattern *_pattern = [[KRKNNPattern alloc] init];
-    [_pattern addFeatures:_features groupName:_group identifier:_identifier];
-    [self.trainingSets setObject:_pattern forKey:_identifier];
+    [self.trainingSets setObject:[[KRKNNPattern alloc] initWithFeatures:_features groupName:_group identifier:_identifier]
+                          forKey:_identifier];
 }
 
 @end
