@@ -29,41 +29,47 @@
     // Features are wording appeared times on a paper as below like :
     // Apple, OS, Mobile, Taiwan, Japan, Developer
     [_knn addFeatures:@[@20, @9, @1, @3, @6, @2]
-                group:@"Apple Fans"
+            groupName:@"Apple Fans"
            identifier:@"Smith"];
     
     [_knn addFeatures:@[@52, @32, @18, @7, @0, @1]
-                group:@"Apple Fans"
+            groupName:@"Apple Fans"
            identifier:@"John"];
     
     [_knn addFeatures:@[@2, @20, @15, @5, @9, @16]
-                group:@"Linux Fans"
+            groupName:@"Linux Fans"
            identifier:@"James"];
     
     [_knn addFeatures:@[@7, @11, @2, @12, @1, @0]
-                group:@"Linux Fans"
+            groupName:@"Linux Fans"
            identifier:@"Terry"];
     
     [_knn addFeatures:@[@20, @8, @3, @21, @8, @25]
-                group:@"Android Fans"
+            groupName:@"Android Fans"
            identifier:@"Sam"];
     
     [_knn addFeatures:@[@2, @30, @8, @6, @33, @29]
-                group:@"Android Fans"
+            groupName:@"Android Fans"
            identifier:@"Amy"];
     
+    // If you have batch-patterns (ex : 10 patterns) wanna classify that you could use for-loop to run the classify function,
+    // In this demo that classifies a pattern by once time.
     [_knn classifyFeatures:@[@20, @1, @10, @2, @12, @3]
                 identifier:@"Bob"
                  kNeighbor:[_knn chooseK]
-                completion:^(BOOL success, NSString *ownGroup, NSInteger neighborCount, NSDictionary *allData) {
+                completion:^(BOOL success, NSString *ownGroup, NSInteger neighborCount, NSArray *allPatterns) {
                     if( success )
                     {
                         NSLog(@"ownGroup : %@", ownGroup);
                         NSLog(@"neighborCount : %li", neighborCount);
-                        NSLog(@"allData : %@", allData);
+                        NSLog(@"allPatterns : %@", allPatterns);
+                        // Looping that all classified patterns.
+                        for( KRKNNPattern *pattern in allPatterns )
+                        {
+                            NSLog(@"pattern id is 「%@」 and group name is 「%@」", pattern.identifier, pattern.groupName);
+                        }
                     }
                 }];
-    
 }
 
 - (void)didReceiveMemoryWarning {

@@ -7,7 +7,7 @@ Machine Learning (マシンラーニング) in this project, it implemented KNN(
 
 ```ruby
 platform :ios, '7.0'
-pod "KRKNN", "~> 1.1.3"
+pod "KRKNN", "~> 1.1.4"
 ```
 
 ## How to use
@@ -19,6 +19,14 @@ pod "KRKNN", "~> 1.1.3"
 ```
 
 #### Normal Sample
+
+Current implemented distance of kernel methods are :
+
+``` objective-c
+KRKNNKernelEuclidean
+KRKNNKernelCosineSimilarity
+KRKNNKernelRBF
+```
 
 ``` objective-c
 KRKNN *_knn = [KRKNN sharedInstance];
@@ -51,30 +59,29 @@ _knn.kernel = KRKNNKernelEuclidean;
             group:@"Android Fans"
        identifier:@"Amy"];
 
+// If you have batch-patterns (ex : 10 patterns) wanna classify that you could use for-loop to run the classify function,
+// In this demo that classifies a pattern by once time.
 [_knn classifyFeatures:@[@20, @1, @10, @2, @12, @3]
             identifier:@"Bob"
              kNeighbor:[_knn chooseK]
-            completion:^(BOOL success, NSString *ownGroup, NSInteger neighborCount, NSDictionary *allData) {
+            completion:^(BOOL success, NSString *ownGroup, NSInteger neighborCount, NSArray *allPatterns) {
                 if( success )
                 {
                     NSLog(@"ownGroup : %@", ownGroup);
                     NSLog(@"neighborCount : %li", neighborCount);
-                    NSLog(@"allData : %@", allData);
+                    NSLog(@"allPatterns : %@", allPatterns);
+                    // Looping that all classified patterns.
+                    for( KRKNNPattern *pattern in allPatterns )
+                    {
+                        NSLog(@"pattern id is 「%@」 and group name is 「%@」", pattern.identifier, pattern.groupName);
+                    }
                 }
             }];
 ```
 
-Current implemented distance of kernel methods are :
-
-``` objective-c
-KRKNNKernelEuclidean
-KRKNNKernelCosineSimilarity
-KRKNNKernelRBF
-```
-
 ## Version
 
-V1.1.3
+V1.1.4
 
 ## License
 

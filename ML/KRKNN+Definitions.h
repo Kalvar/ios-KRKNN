@@ -6,6 +6,6 @@
 //  Copyright (c) 2015年 Kalvar Lin. All rights reserved.
 //
 
-static NSString *unknown       = @"Unknown";
-static NSString *identifierKey = @"identifier";
-static NSString *distanceKey   = @"distance";
+static NSString *kUnknownStatus = @"unknown";
+static NSString *kIdentifierKey = @"identifier";
+static NSString *kDistanceKey   = @"distance";

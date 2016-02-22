@@ -86,11 +86,11 @@
     return _distance;
 }
 
--(void)_addClassifiedSetsAtFeatures:(NSArray *)_features group:(NSString *)_group identifier:(NSString *)_identifier
+-(void)_addClassifiedSetsAtFeatures:(NSArray *)_features groupName:(NSString *)_group identifier:(NSString *)_identifier
 {
-    [self.trainingSets setObject:[_features copy] forKey:_identifier];
-    [self.trainingGroups setObject:[_group copy] forKey:_identifier];
-    [self.allData setObject:@[_group, _identifier, _features] forKey:_identifier];
+    KRKNNPattern *_pattern = [[KRKNNPattern alloc] init];
+    [_pattern addFeatures:_features groupName:_group identifier:_identifier];
+    [self.trainingSets setObject:_pattern forKey:_identifier];
 }
 
 @end
@@ -101,8 +101,7 @@
 {
     static dispatch_once_t pred;
     static KRKNN *_object = nil;
-    dispatch_once(&pred, ^
-    {
+    dispatch_once(&pred, ^{
         _object = [[KRKNN alloc] init];
     });
     return _object;
@@ -113,10 +112,8 @@
     self = [super init];
     if( self )
     {
-        _trainingSets   = [NSMutableDictionary new];
-        _trainingGroups = [NSMutableDictionary new];
-        _allData        = [NSMutableDictionary new];
-        _kernel         = KRKNNKernelCosineSimilarity;
+        _trainingSets = [NSMutableDictionary new];
+        _kernel       = KRKNNKernelCosineSimilarity;
     }
     return self;
 }
@@ -124,26 +121,26 @@
 #pragma --mark Creates Training Sets
 // Adding the training sets be the basic patterns to do classfication.
 // @param _group means the training-sets own to which group.
--(void)addFeatures:(NSArray *)_features group:(NSString *)_group identifier:(NSString *)_identifier
+-(void)addFeatures:(NSArray *)_features groupName:(NSString *)_groupName identifier:(NSString *)_identifier
 {
     if( nil == _features || [_features count] < 1 )
     {
         return;
     }
     
-    if( nil == _group || [_group length] < 1 )
+    if( nil == _groupName || [_groupName length] < 1 )
     {
-        _group = unknown;
+        _groupName = kUnknownStatus;
     }
     
     if( nil == _identifier || [_identifier length] < 1 )
     {
-        _identifier = [NSString stringWithFormat:@"%@%li", unknown, [_trainingSets count]];
+        _identifier = [NSString stringWithFormat:@"%@%li", kUnknownStatus, [_trainingSets count]];
     }
     
     // Uses key/value to make the basic training-sets, one key for one point on the hyperplane of classification.
     [self _addClassifiedSetsAtFeatures:_features
-                                 group:_group
+                             groupName:_groupName
                             identifier:_identifier];
 }
 
@@ -161,16 +158,17 @@
     
     if( nil == _identifier || [_identifier length] < 1 )
     {
-        _identifier = [NSString stringWithFormat:@"%@%li", unknown, [_trainingSets count] + 1];
+        _identifier = [NSString stringWithFormat:@"%@%li", kUnknownStatus, [_trainingSets count] + 1];
     }
     
     NSMutableArray *_sorts = [NSMutableArray new];
-    NSString *_idKey       = identifierKey;
-    NSString *_distanceKey = distanceKey;
+    NSString *_idKey       = kIdentifierKey;
+    NSString *_distanceKey = kDistanceKey;
     // Catchs every feature
     for( NSString *_classifiedId in _trainingSets )
     {
-        float _distance = [self _distanceWithClassifiedFeatures:[_trainingSets objectForKey:_classifiedId] patternFeatures:_features];
+        KRKNNPattern *_pattern = (KRKNNPattern *)[_trainingSets objectForKey:_classifiedId];
+        float _distance = [self _distanceWithClassifiedFeatures:_pattern.features patternFeatures:_features];
         [_sorts addObject:@{_idKey : _classifiedId, _distanceKey : [NSNumber numberWithFloat:_distance]}];
     }
     
@@ -186,8 +184,8 @@
     NSInteger _k                         = 0;
     for( NSDictionary *_neighbors in _sortedGroups )
     {
-        // Catchs classification group by pattern id
-        NSString *_classifiedGroup = [_trainingGroups objectForKey:[_neighbors objectForKey:_idKey]];
+        // Catchs classification group by pattern id, 取出該鄰居是屬於哪一群
+        NSString *_classifiedGroup = ((KRKNNPattern *)[_trainingSets objectForKey:[_neighbors objectForKey:_idKey]]).groupName;
         // Counting how many group types nearby the pattern
         NSNumber *_times           = [_countingNears objectForKey:_classifiedGroup];
         NSInteger _counting        = 1;
@@ -250,13 +248,13 @@
     {
         _success = YES;
         [self _addClassifiedSetsAtFeatures:_features
-                                     group:_ownGroup
+                                 groupName:_ownGroup
                                 identifier:_identifier];
     }
     
     if( _doCompletion )
     {
-        _doCompletion(_success, _ownGroup, _maxCounting, _allData);
+        _doCompletion(_success, _ownGroup, _maxCounting, [_trainingSets allValues]);
     }
     
 }

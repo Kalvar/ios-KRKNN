@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8E2C40481C7B5A2F00ADB0AB /* KRKNNPattern.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E2C40471C7B5A2F00ADB0AB /* KRKNNPattern.m */; };
 		8E7D0B721B9316B9003C6C50 /* KRKNN.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E7D0B711B9316B9003C6C50 /* KRKNN.m */; };
 		8EA233A41B8C92E3007F03E2 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 8EA233A31B8C92E3007F03E2 /* main.m */; };
 		8EA233A71B8C92E3007F03E2 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 8EA233A61B8C92E3007F03E2 /* AppDelegate.m */; };
@@ -28,6 +29,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		8E2C40461C7B5A2F00ADB0AB /* KRKNNPattern.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KRKNNPattern.h; sourceTree = "<group>"; };
+		8E2C40471C7B5A2F00ADB0AB /* KRKNNPattern.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KRKNNPattern.m; sourceTree = "<group>"; };
 		8E7D0B701B9316A9003C6C50 /* KRKNN.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KRKNN.h; sourceTree = "<group>"; };
 		8E7D0B711B9316B9003C6C50 /* KRKNN.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KRKNN.m; sourceTree = "<group>"; };
 		8E7D0B731B931CD4003C6C50 /* KRKNN+Definitions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "KRKNN+Definitions.h"; sourceTree = "<group>"; };
@@ -68,6 +71,8 @@
 			isa = PBXGroup;
 			children = (
 				8E7D0B731B931CD4003C6C50 /* KRKNN+Definitions.h */,
+				8E2C40461C7B5A2F00ADB0AB /* KRKNNPattern.h */,
+				8E2C40471C7B5A2F00ADB0AB /* KRKNNPattern.m */,
 				8E7D0B701B9316A9003C6C50 /* KRKNN.h */,
 				8E7D0B711B9316B9003C6C50 /* KRKNN.m */,
 			);
@@ -236,6 +241,7 @@
 			files = (
 				8EA233AA1B8C92E3007F03E2 /* ViewController.m in Sources */,
 				8EA233A71B8C92E3007F03E2 /* AppDelegate.m in Sources */,
+				8E2C40481C7B5A2F00ADB0AB /* KRKNNPattern.m in Sources */,
 				8E7D0B721B9316B9003C6C50 /* KRKNN.m in Sources */,
 				8EA233A41B8C92E3007F03E2 /* main.m in Sources */,
 			);
