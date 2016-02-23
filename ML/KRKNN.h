@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "KRKNN+Definitions.h"
 #import "KRKNNPattern.h"
 
 typedef enum KRKNNKernels
@@ -20,16 +21,14 @@ typedef void(^KRKNNCompletion)(BOOL success, NSString *ownGroup, NSInteger neigh
 
 @interface KRKNN : NSObject
 
-@property (nonatomic, strong) NSMutableDictionary *trainingSets;
 @property (nonatomic, assign) KRKNNKernels kernel;
-@property (nonatomic, copy) KRKNNCompletion completion;
 
 +(instancetype)sharedInstance;
 -(instancetype)init;
 
--(void)addFeatures:(NSArray *)_features groupName:(NSString *)_group identifier:(NSString *)_identifier;
--(void)classifyFeatures:(NSArray *)_features identifier:(NSString *)_identifier kNeighbor:(NSInteger)_kNeighbor completion:(KRKNNCompletion)_doCompletion;
--(void)classifyFeatures:(NSArray *)_features identifier:(NSString *)_identifier completion:(KRKNNCompletion)_doCompletion;
+-(void)addFeatures:(NumberArray *)_features groupName:(NSString *)_group identifier:(NSString *)_identifier;
+-(void)classifyFeatures:(NumberArray *)_features identifier:(NSString *)_identifier kNeighbor:(NSInteger)_kNeighbor completion:(KRKNNCompletion)_doCompletion;
+-(void)classifyFeatures:(NumberArray *)_features identifier:(NSString *)_identifier completion:(KRKNNCompletion)_doCompletion;
 
 -(NSInteger)chooseK;
 

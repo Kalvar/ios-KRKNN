@@ -61,7 +61,7 @@
                     if( success )
                     {
                         NSLog(@"ownGroup : %@", ownGroup);
-                        NSLog(@"neighborCount : %li", neighborCount);
+                        NSLog(@"neighborCount : %td", neighborCount);
                         NSLog(@"allPatterns : %@", allPatterns);
                         // Looping that all classified patterns.
                         for( KRKNNPattern *pattern in allPatterns )
