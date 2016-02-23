@@ -7,68 +7,69 @@
 //
 
 #import "KRKNN.h"
-#import "KRKNN+Definitions.h"
 
 @interface KRKNN ()
 
+@property (nonatomic, strong) KRKNNPatternMutableDictionary *trainingSets;
+
 @end
+
+#pragma mark - KRKNN Category fixCalculations
 
 @implementation KRKNN (fixCalculations)
 
 // Calculated by Cosine Similarity method, 歸屬度概念是越大越近
--(float)_cosineWithClassifiedFeatures:(NSArray *)_classifiedFeatures patternFeatures:(NSArray *)_patternFeatures
+-(float)_cosineWithClassifiedFeatures:(NumberArray *)_classifiedFeatures patternFeatures:(NumberArray *)_patternFeatures
 {
-    float _sumA  = 0.0f;
-    float _sumB  = 0.0f;
-    float _sumAB = 0.0f;
-    int _index   = 0;
-    for( NSNumber *_featureValue in _classifiedFeatures )
+    float _sumA        = 0.0f;
+    float _sumB        = 0.0f;
+    float _sumAB       = 0.0f;
+    for( int _index = 0; _index < _classifiedFeatures.count; _index++ )
     {
-        NSNumber *_patternValue = [_patternFeatures objectAtIndex:_index];
-        float _aValue  = [_featureValue floatValue];
-        float _bValue  = [_patternValue floatValue];
-        _sumA         += ( _aValue * _aValue );
-        _sumB         += ( _bValue * _bValue );
+        float _aValue  = _classifiedFeatures[_index].floatValue;
+        float _bValue  = _patternFeatures[_index].floatValue;
+        _sumA         += powf( _aValue, 2 );
+        _sumB         += powf( _bValue, 2 );
         _sumAB        += ( _aValue * _bValue );
-        ++_index;
     }
+    
+    // 由於 _sumA 與 _sumB 皆為平方值疊加, 因此 _ab 必 >= 0
     float _ab = _sumA * _sumB;
-    return ( _ab > 0.0f ) ? ( _sumAB / sqrtf( _ab ) ) : 0.0f;
+    return _ab ? ( _sumAB / sqrtf( _ab ) ) : 0.0f;
 }
 
 // Euclidean distance which multi-dimensional formula, 距離概念是越小越近
--(float)_euclideanWithClassifiedFeatures:(NSArray *)_classifiedFeatures patternFeatures:(NSArray *)_patternFeatures
+-(float)_euclideanWithClassifiedFeatures:(NumberArray *)_classifiedFeatures patternFeatures:(NumberArray *)_patternFeatures
 {
-    NSInteger _index = 0;
     float _sum       = 0.0f;
-    for( NSNumber *_x in _classifiedFeatures )
+    
+    // 由於 _sum 加的皆是平方值, 因此 _sum 必 >= 0
+    for( int _index = 0; _index < _classifiedFeatures.count; _index++ )
     {
-        _sum        += powf([_x floatValue] - [[_patternFeatures objectAtIndex:_index] floatValue], 2);
-        ++_index;
+        _sum        += powf( _classifiedFeatures[_index].floatValue - _patternFeatures[_index].floatValue, 2 );
     }
-    return (_index > 0) ? sqrtf(_sum) : _sum;
+    return sqrtf( _sum );
 }
 
--(double)_rbf:(NSArray *)_x1 x2:(NSArray *)_x2 sigma:(float)_sigma
+-(double)_rbf:(NumberArray *)_x1 x2:(NumberArray *)_x2 sigma:(float)_sigma
 {
     double _sum      = 0.0f;
-    NSInteger _index = 0;
-    for( NSNumber *_value in _x1 )
+    for( int _index = 0; _index < _x1.count; _index++ )
     {
         // Formula : s = s + ( v1[i] - v2[i] )^2
-        double _v  = [_value doubleValue] - [[_x2 objectAtIndex:_index] doubleValue];
-        _sum      += ( _v * _v );
-        ++_index;
+        double _v    = _x1[_index].doubleValue - _x2[_index].doubleValue;
+        _sum        += pow( _v, 2 );
     }
+    
     // Formula : exp^( -s / ( 2.0f * sigma * sigma ) )
-    return pow(M_E, ((-_sum) / ( 2.0f * _sigma * _sigma )));
+    return pow( M_E, ( -_sum ) / ( 2.0f * _sigma * _sigma ) );
 }
 
 // 距離概念是越小越近, 歸屬度概念是越大越近 (也能用 1.0f 取其差值，即能越小越近)
--(float)_distanceWithClassifiedFeatures:(NSArray *)_classifiedFeatures patternFeatures:(NSArray *)_patternFeatures
+-(float)_distanceWithClassifiedFeatures:(NumberArray *)_classifiedFeatures patternFeatures:(NumberArray *)_patternFeatures
 {
     float _distance = 0.0f;
-    switch (self.kernel)
+    switch ( self.kernel )
     {
         case KRKNNKernelCosineSimilarity:
             _distance = 1.0f - [self _cosineWithClassifiedFeatures:_classifiedFeatures patternFeatures:_patternFeatures];
@@ -86,7 +87,7 @@
     return _distance;
 }
 
--(void)_addClassifiedSetsAtFeatures:(NSArray *)_features groupName:(NSString *)_group identifier:(NSString *)_identifier
+-(void)_addClassifiedSetsAtFeatures:(NumberArray *)_features groupName:(NSString *)_group identifier:(NSString *)_identifier
 {
     [self.trainingSets setObject:[[KRKNNPattern alloc] initWithFeatures:_features groupName:_group identifier:_identifier]
                           forKey:_identifier];
@@ -94,47 +95,56 @@
 
 @end
 
+#pragma mark - Class KRKNN
+
 @implementation KRKNN
+
+#pragma mark - Class Method
 
 +(instancetype)sharedInstance
 {
     static dispatch_once_t pred;
     static KRKNN *_object = nil;
     dispatch_once(&pred, ^{
-        _object = [[KRKNN alloc] init];
+        _object = [KRKNN new];
     });
     return _object;
 }
+
+#pragma mark - Instance Method
+
+#pragma mark * Init
 
 -(instancetype)init
 {
     self = [super init];
     if( self )
     {
-        _trainingSets = [NSMutableDictionary new];
+        _trainingSets = [NSMutableDictionary dictionary];
         _kernel       = KRKNNKernelCosineSimilarity;
     }
     return self;
 }
 
-#pragma --mark Creates Training Sets
+#pragma mark * Creates Training Sets
+
 // Adding the training sets be the basic patterns to do classfication.
 // @param groupName means the training-sets own to which group.
--(void)addFeatures:(NSArray *)_features groupName:(NSString *)_groupName identifier:(NSString *)_identifier
+-(void)addFeatures:(NumberArray *)_features groupName:(NSString *)_groupName identifier:(NSString *)_identifier
 {
-    if( nil == _features || [_features count] < 1 )
+    if( nil == _features || _features.count < 1 )
     {
         return;
     }
     
-    if( nil == _groupName || [_groupName length] < 1 )
+    if( nil == _groupName || _groupName.length < 1 )
     {
         _groupName = kUnknownStatus;
     }
     
-    if( nil == _identifier || [_identifier length] < 1 )
+    if( nil == _identifier || _identifier.length < 1 )
     {
-        _identifier = [NSString stringWithFormat:@"%@%li", kUnknownStatus, [_trainingSets count]];
+        _identifier = [NSString stringWithFormat:@"%@%td", kUnknownStatus, _trainingSets.count];
     }
     
     // Uses key/value to make the basic training-sets, one key for one point on the hyperplane of classification.
@@ -143,54 +153,55 @@
                             identifier:_identifier];
 }
 
--(void)classifyFeatures:(NSArray *)_features identifier:(NSString *)_identifier kNeighbor:(NSInteger)_kNeighbor completion:(KRKNNCompletion)_doCompletion
+-(void)classifyFeatures:(NumberArray *)_features identifier:(NSString *)_identifier kNeighbor:(NSInteger)_kNeighbor completion:(KRKNNCompletion)_doCompletion
 {
-    if( nil == _features || [_features count] < 1 )
+    if( nil == _features || _features.count < 1 )
     {
         return;
     }
     
-    if( nil == _trainingSets || [_trainingSets count] < 1 )
+    if( nil == _trainingSets || _trainingSets.count < 1 )
     {
         return;
     }
     
-    if( nil == _identifier || [_identifier length] < 1 )
+    if( nil == _identifier || _identifier.length < 1 )
     {
-        _identifier = [NSString stringWithFormat:@"%@%li", kUnknownStatus, [_trainingSets count] + 1];
+        _identifier = [NSString stringWithFormat:@"%@%td", kUnknownStatus, _trainingSets.count + 1];
     }
     
-    NSMutableArray *_sorts = [NSMutableArray new];
+    NSMutableArray *_sorts = [NSMutableArray array];
     NSString *_idKey       = kIdentifierKey;
     NSString *_distanceKey = kDistanceKey;
+    
     // Catchs every feature
     for( NSString *_classifiedId in _trainingSets )
     {
-        KRKNNPattern *_pattern = (KRKNNPattern *)[_trainingSets objectForKey:_classifiedId];
+        KRKNNPattern *_pattern = _trainingSets[_classifiedId];
         float _distance = [self _distanceWithClassifiedFeatures:_pattern.features patternFeatures:_features];
         [_sorts addObject:@{_idKey : _classifiedId, _distanceKey : [NSNumber numberWithFloat:_distance]}];
     }
     
     NSSortDescriptor *_sortDescriptor    = [NSSortDescriptor sortDescriptorWithKey:_distanceKey ascending:YES];
-    NSArray *_sortedGroups               = [_sorts sortedArrayUsingDescriptors:[NSArray arrayWithObject:_sortDescriptor]];
+    NSArray *_sortedGroups               = [_sorts sortedArrayUsingDescriptors:@[_sortDescriptor]];
     
     // Catchs K neighbors
-    NSMutableDictionary *_countingNears  = [NSMutableDictionary new];
-    NSMutableDictionary *_sumDistances   = [NSMutableDictionary new];
-    NSInteger _maxCounting               = 0;
-    NSString *_ownGroup                  = @"";
-    BOOL _success                        = NO;
-    NSInteger _k                         = 0;
+    NSNumberMutableDictionary *_countingNears  = [NSMutableDictionary dictionary];
+    NSNumberMutableDictionary *_sumDistances   = [NSMutableDictionary dictionary];
+    NSInteger _maxCounting                     = 0;
+    NSString *_ownGroup                        = @"";
+    NSInteger _k                               = 0;
     for( NSDictionary *_neighbors in _sortedGroups )
     {
         // Catchs classification group by pattern id, 取出該鄰居是屬於哪一群
-        NSString *_classifiedGroup = ((KRKNNPattern *)[_trainingSets objectForKey:[_neighbors objectForKey:_idKey]]).groupName;
+        NSString *_classifiedGroup = _trainingSets[_neighbors[_idKey]].groupName;
+        
         // Counting how many group types nearby the pattern
-        NSNumber *_times           = [_countingNears objectForKey:_classifiedGroup];
+        NSNumber *_times           = _countingNears[_classifiedGroup];
         NSInteger _counting        = 1;
         if( nil != _times )
         {
-            _counting += [_times integerValue];
+            _counting += _times.integerValue;
         }
         
         if( _counting > _maxCounting )
@@ -198,18 +209,18 @@
             _maxCounting = _counting;
             _ownGroup    = _classifiedGroup;
         }
-        [_countingNears setObject:[NSNumber numberWithInteger:_counting] forKey:_classifiedGroup];
+        _countingNears[_classifiedGroup] = @(_counting);
         
         // Sum the distance of neighbor of pattern, 計算同群的鄰居們總距離 (用於輔助判斷在群組鄰居數相同時，最後該被分到哪一群裡)
-        NSNumber *_groupDistance    = [_sumDistances objectForKey:_classifiedGroup];
-        NSNumber *_neighborDistance = [_neighbors objectForKey:_distanceKey];
+        NSNumber *_groupDistance    = _sumDistances[_classifiedGroup];
+        NSNumber *_neighborDistance = _neighbors[_distanceKey];
         float _distance             = 0.0f;
         if( nil != _groupDistance )
         {
-            _distance = [_groupDistance floatValue];
+            _distance = _groupDistance.floatValue;
         }
-        _distance += [_neighborDistance floatValue];
-        [_sumDistances setObject:[NSNumber numberWithFloat:_distance] forKey:_classifiedGroup];
+        _distance += _neighborDistance.floatValue;
+        _sumDistances[_classifiedGroup] = @(_distance);
         
         ++_k;
         if( _k >= _kNeighbor )
@@ -220,7 +231,7 @@
              *     如果 < 4，有可能會發生每群都是相等的最近鄰居數量 (例如 1 群 1 個)，只要 k 個鄰居數量是能被群組數量 % 整除的，就有可能會有這問題。
              */
             // 檢查統計好的分群，是否有跟其它分群的鄰居數量相等的情況
-            float _ownDistance = [[_sumDistances objectForKey:_ownGroup] floatValue];
+            float _ownDistance = _sumDistances[_ownGroup].floatValue;
             NSString *_myGroup = [_ownGroup copy];
             for( NSString *_groupName in _countingNears )
             {
@@ -228,10 +239,11 @@
                 {
                     continue;
                 }
+                
                 // 如果其它群有跟分到的群相同的最近鄰居數，則需比較每群距離來決定該把 Pattern 分到哪群 (挑最小距離總和)
-                if( [[_countingNears objectForKey:_groupName] floatValue] == _maxCounting )
+                if( _countingNears[_groupName].floatValue == _maxCounting )
                 {
-                    float _otherDistance = [[_sumDistances objectForKey:_groupName] floatValue];
+                    float _otherDistance = _sumDistances[_groupName].floatValue;
                     if( _otherDistance < _ownDistance )
                     {
                         _ownDistance = _otherDistance;
@@ -243,9 +255,9 @@
         }
     }
     
-    if( _maxCounting > 0 )
+    BOOL _success = ( _maxCounting > 0 );
+    if( _success )
     {
-        _success = YES;
         [self _addClassifiedSetsAtFeatures:_features
                                  groupName:_ownGroup
                                 identifier:_identifier];
@@ -258,7 +270,7 @@
     
 }
 
--(void)classifyFeatures:(NSArray *)_features identifier:(NSString *)_identifier completion:(KRKNNCompletion)_doCompletion
+-(void)classifyFeatures:(NumberArray *)_features identifier:(NSString *)_identifier completion:(KRKNNCompletion)_doCompletion
 {
     [self classifyFeatures:_features identifier:_identifier kNeighbor:[self chooseK] completion:_doCompletion];
 }

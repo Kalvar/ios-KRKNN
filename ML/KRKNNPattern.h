@@ -7,17 +7,18 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "KRKNN+Definitions.h"
 
 @interface KRKNNPattern : NSObject
 
-@property (nonatomic, strong) NSMutableArray *features;
-@property (nonatomic, strong) NSString *groupName;
-@property (nonatomic, strong) NSString *identifier;
+@property (nonatomic, strong, readonly) NumberMutableArray *features;
+@property (nonatomic, strong, readonly) NSString *groupName;
+@property (nonatomic, strong, readonly) NSString *identifier;
 
 +(instancetype)sharedPattern;
 -(instancetype)init;
--(instancetype)initWithFeatures:(NSArray *)_kFeatures groupName:(NSString *)_kGroupName identifier:(NSString *)_kIdentifier;
+-(instancetype)initWithFeatures:(NumberArray *)_kFeatures groupName:(NSString *)_kGroupName identifier:(NSString *)_kIdentifier;
 
--(void)addFeatures:(NSArray *)_kFeatures groupName:(NSString *)_kGroupName identifier:(NSString *)_kIdentifier;
+-(void)addFeatures:(NumberArray *)_kFeatures groupName:(NSString *)_kGroupName identifier:(NSString *)_kIdentifier;
 
 @end
